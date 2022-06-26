@@ -5,7 +5,7 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  ViewChild,
+  // ViewChild,
 } from '@angular/core';
 import { Subject, Subscription } from 'rxjs';
 import { ChatbotService } from '../chatbot.service';
@@ -21,7 +21,7 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   public changeColor: boolean = false;
   private subscription: Subscription;
   private initialMessage: Message = {
-    text: '',
+    text: 'გამარჯობა, რით შემიძლია დაგეხმაროთ?',
     date: this.getTime(),
     userOwner: false,
     selectOptions: [],
@@ -32,7 +32,8 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   public showMenu: boolean = false;
   public timestamp: string;
 
-  @ViewChild('messagesContainer') container: ElementRef;
+  // @ViewChild('messagesContainer') container: ElementRef;
+  public container: ElementRef;
 
   constructor(private chatService: ChatbotService) {}
 
@@ -45,8 +46,10 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
       this.changeColor = value;
     });
 
-    this.getInitialMessage();
+    // this.getInitialMessage();
     this.messages = [this.initialMessage];
+
+
   }
 
   public ngAfterViewChecked(): void {
@@ -118,31 +121,78 @@ export class ChatbotComponent implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private getResponse(text: string): void {
-    const formData = new FormData();
-    formData.append('question', text);
-
-    this.chatService.getResponse(formData).subscribe((response: any) => {
+    let products;
+    this.chatService.getResponse(text).subscribe((response: any) => {
+      // console.log(response)
       this.messages.push({
-        text: response.answer,
+        text: response.responseMessage,
         date: this.getTime(),
         userOwner: false,
       });
+      console.log(response.products);
+      products = response.products;
+      console.log(products[0].name);
       localStorage.setItem('history', JSON.stringify(this.messages));
     });
   }
 
-  private getInitialMessage(): void {
-    this.chatService.getInitMessage().subscribe((response: string) => {
-      this.initialMessage.text = response;
-    });
+  // fix the container (scroll)
+  // add list view
+  // card design
+  // add attachment -  photo - send in formdata(binary)
 
-    this.chatService.getSelections().subscribe((response: string[]) => {
-      this.initialMessage.selectOptions = response.map((el, index) => ({
-        id: index + 1,
-        text: el,
-      }));
-    });
-  }
+//   Array [ {…} ]
+// ​
+// 0: Object { name: "მასიმო დუტის შარვალი", description: "ყველაზე მაგარი ბრენდული შარვალი", productPhotoId: 3, … }
+// ​​
+// clothType: Object { name: "Pants", description: null, id: 1 }
+// ​​
+// clothTypeId: 1
+// ​​
+// colorType: Object { name: "Black", description: null, id: 9 }
+// ​​
+// colorTypeId: 9
+// ​​
+// description: "ყველაზე მაგარი ბრენდული შარვალი"
+// ​​
+// id: 1
+// ​​
+// materialType: Object { name: "Cotton", description: null, id: 2 }
+// ​​
+// materialTypeId: 2
+// ​​
+// name: "მასიმო დუტის შარვალი"
+// ​​
+// price: 399.99
+// ​​
+// productPhoto: Object { path: "C:\\Users\\ramazi\\Desktop\\photos\\pants.jpg", data: null, id: 3 }
+// ​​
+// productPhotoId: 3
+// ​​
+// sizeEuType: Object { value: 39, description: null, id: 39 }
+// ​​
+// sizeEuTypeId: 39
+// ​​
+// sizeUsType: Object { value: "M", description: null, id: 38 }
+// ​​
+// sizeUsTypeId: 38
+// ​​
+// userCart: null
+// ​​
+// userCartId: null
+
+  // private getInitialMessage(): void {
+  //   this.chatService.getInitMessage().subscribe((response: string) => {
+  //     this.initialMessage.text = response;
+  //   });
+
+    // this.chatService.getSelections().subscribe((response: string[]) => {
+    //   this.initialMessage.selectOptions = response.map((el, index) => ({
+    //     id: index + 1,
+    //     text: el,
+    //   }));
+    // });
+  // }
 
   private getTime(isMainTimestamp?: boolean): string {
     const date = new Date();
